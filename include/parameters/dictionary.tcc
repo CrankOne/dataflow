@@ -9,11 +9,6 @@
 namespace dataflow {
 namespace config {
 
-class Dictionary : public AbstractParameter
-                 , public std::map<std::string, AbstractParameter *> {
-    // ...
-};  // class Dictionary
-
 }  // namespace ::dataflow::config
 }  // namespace ::dataflow
 

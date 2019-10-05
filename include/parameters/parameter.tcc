@@ -1,35 +1,55 @@
 # ifndef H_DATAFLOW_SYS_IPARAMETER_H
 # define H_DATAFLOW_SYS_IPARAMETER_H
 
+# include <map>
+# include <string>
+
 namespace dataflow {
 namespace config {
 
+template<typename T> class Parameter;
 template<typename T> struct ParameterTypeTraits;
 
 /// Code of parameters type
 enum ParameterType {
-    kLogic  = 0x4,
+    kDict   = 0x1,
+    kTuple  = 0x2,
+
+    kLogic  = 0x4 ,
+    //kLogicDict  = kLogic | kDict,
+    //kLogicTuple = kLogic | kTuple,
+
     kInt    = 0x8 ,
+    //kDictLogic  = kInt | kDict,
+    //kTupleLogic = kInt | kTuple,
+
     kReal   = 0x10,
-    kString = 0x20
+    //kDictReal  = kReal | kDict,
+    //kTupleReal = kReal | kTuple,
+
+    kString = 0x20,
+    //kDictString  = kString | kDict,
+    //kTupleString = kString | kTuple,
 };
 
-const int kDict = 0x1;
-const int kTuple = 0x2;
-
 template<> struct ParameterTypeTraits<bool> {
-    constexpr static int code = kLogic;
+    constexpr static ParameterType code = kLogic;
     typedef bool CRef;
 };
 
 template<> struct ParameterTypeTraits<int> {
-    constexpr static int code = kInt;
+    constexpr static ParameterType code = kInt;
     typedef int CRef;
 };
 
 template<> struct ParameterTypeTraits<double> {
-    constexpr static int code = kReal;
-    typedef double& CRef;
+    constexpr static ParameterType code = kReal;
+    typedef const double & CRef;
+};
+
+template<> struct ParameterTypeTraits<std::string> {
+    constexpr static ParameterType code = kString;
+    typedef const std::string & CRef;
 };
 
 /// Base class for all the parameters.
@@ -41,9 +61,11 @@ protected:
 public:
     ParameterType type_code() const { return _pType; }
 
+    virtual ~AbstractParameter() {}
+
     /// Retreival shortcut.
-    template<typename T> const T & as() const {
-        return dynamic_cast<T*>(*this).value();
+    template<typename T> typename ParameterTypeTraits<T>::CRef as() const {
+        return dynamic_cast<const Parameter<T>&>(*this).value();
     }
 };
 
@@ -53,10 +75,26 @@ class Parameter : public AbstractParameter {
 private:
     T _value;
 public:
-    Parameter() : AbstractParameter( ParameterTypeTraits<T>::code ) {}
-    T value() const { return _value; }
+    Parameter()
+        : AbstractParameter( ParameterTypeTraits<T>::code ) {}
+    Parameter( typename ParameterTypeTraits<T>::CRef v )
+        : AbstractParameter( ParameterTypeTraits<T>::code )
+        , _value( v ) {}
+    typename ParameterTypeTraits<T>::CRef value() const { return _value; }
     void value( typename ParameterTypeTraits<T>::CRef v ) { _value = v; }
 };
+
+class Tuple : public AbstractParameter
+            , public std::map<size_t, AbstractParameter *> {
+public:
+    Tuple() : AbstractParameter( kTuple ) {}
+};  // class Tuple
+
+class Dictionary : public AbstractParameter
+                 , public std::map<std::string, AbstractParameter *> {
+public:
+    Dictionary() : AbstractParameter( kDict ) {}
+};  // class Dictionary
 
 }  // namespace ::dataflow::config
 }  // namespace ::dataflow
