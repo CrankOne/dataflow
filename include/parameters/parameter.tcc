@@ -3,6 +3,7 @@
 
 # include <map>
 # include <string>
+# include <memory>
 
 namespace dataflow {
 namespace config {
@@ -85,13 +86,13 @@ public:
 };
 
 class Tuple : public AbstractParameter
-            , public std::map<size_t, AbstractParameter *> {
+            , public std::map<size_t, std::shared_ptr<AbstractParameter> > {
 public:
     Tuple() : AbstractParameter( kTuple ) {}
 };  // class Tuple
 
 class Dictionary : public AbstractParameter
-                 , public std::map<std::string, AbstractParameter *> {
+                 , public std::map<std::string, std::shared_ptr<AbstractParameter> > {
 public:
     Dictionary() : AbstractParameter( kDict ) {}
 };  // class Dictionary

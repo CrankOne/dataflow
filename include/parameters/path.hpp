@@ -59,7 +59,7 @@ public:
     /// Destructor recursively deleting the subsequent tokens in the list.
     ~Path() {
         if( _next ) delete _next; 
-        if( _isStr ) delete _key.str;
+        if( _isStr ) delete [] _key.str;
     }
 
     /// Returns true if its is a string token.

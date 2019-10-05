@@ -54,6 +54,7 @@ Path::from_string( const std::string & strPath ) {
         result = new Path( std::stol( cToken ));
         // todo: ^^^ octal/hex literals
         if( std::string::npos == nextTokStart ) {
+            delete result;
             throw InvalidPathString( "Unbalanced brackets." );
         }
         ++nextTokStart;
@@ -78,16 +79,19 @@ Path::from_string( const std::string & strPath ) {
         }
     } catch( InvalidPathString & e ) {
         e.push_token( cToken );
+        delete result;
         throw e;
     }
     return result;
 }
 
-Path::Path( size_t index ) : _isStr(false), _next(nullptr) {
+Path::Path( size_t index ) : _isStr(false)
+                           , _next(nullptr) {
     _key.n = index;
 }
 
-Path::Path( const std::string & strTok ) : _isStr(true), _next(nullptr) {
+Path::Path( const std::string & strTok ) : _isStr(false)  // protect from delete on failure
+                                         , _next(nullptr) {
     if( strTok.empty() ) {
         throw InvalidPathString( "Empty path str-token provided" );
     }
@@ -98,6 +102,7 @@ Path::Path( const std::string & strTok ) : _isStr(true), _next(nullptr) {
         throw InvalidPathString( bf );
     }
     _key.str = new char [ strTok.size() + 1 ];
+    _isStr = true;  // set it now -- dtr is now responsible for cleaning
     strncpy( _key.str, strTok.c_str(), strTok.size() );
     _key.str[strTok.size()] = '\0';
 }

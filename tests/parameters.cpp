@@ -72,17 +72,17 @@ TEST( Configuration, parametersTuple ) {
 // Tests simple tuple basic parameters insertion and retrieval
 TEST( Configuration, nestedRetrieval ) {
     Tuple tpl;
-    Dictionary dct;
+    Dictionary * dct = new Dictionary();  // has to be on heap
     tpl.emplace( 0
                , new Parameter<bool>(true) );
     tpl.emplace( 106
-               , &dct );
-    dct.emplace( "_"
+               , dct );
+    dct->emplace( "_"
                , new Parameter<double>(3.) );
-    dct.emplace( "foo"
+    dct->emplace( "foo"
                , new Parameter<std::string>("some") );
     ASSERT_EQ( 2, tpl.size() );
-    ASSERT_EQ( 2, dct.size() );
+    ASSERT_EQ( 2, dct->size() );
     // Retrieve data from simple dictionary
     Path * pOne   = Path::from_string( "[0]" )
        , * pTwo   = Path::from_string( "[106]._" )
