@@ -3,8 +3,6 @@
 # include <cstring>
 # include <regex>
 
-# include <iostream>  // XXX
-
 static std::regex gReStrPathTok( "^[a-zA-Z_][a-zA-Z0-9_]*$" )
                 , gReIntPathTok( "^0|([1-9][0-9]*)$" )
                 ;
